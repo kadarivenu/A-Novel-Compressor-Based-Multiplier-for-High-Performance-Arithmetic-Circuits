@@ -1,0 +1,74 @@
+`timescale 1ns / 1ps
+
+module wallace_tb();
+
+// Inputs
+reg [7:0] A;
+reg [7:0] B;
+
+// Output
+wire [15:0] P;
+
+// File handles
+integer fileA, fileB, fileOut;
+integer statusA, statusB;
+
+// Instantiate DUT
+wallace_8x8 uut (
+    .A(A),
+    .B(B),
+    .P(P)
+);
+
+initial begin
+    // Initialize
+    A = 0;
+    B = 0;
+
+    // Open files
+    fileA  = $fopen("plain.txt", "r");
+    fileB  = $fopen("mask.txt", "r");
+    fileOut = $fopen("sreeram.txt", "w");
+
+    // Check file open
+    if (fileA == 0 || fileB == 0 || fileOut == 0) begin
+        $display("ERROR: File opening failed!");
+        $finish;
+    end
+
+    #5; // small delay
+
+    // Loop until end of files
+    while (!$feof(fileA) && !$feof(fileB)) begin
+        
+        statusA = $fscanf(fileA, "%d\n", A);
+        statusB = $fscanf(fileB, "%d\n", B);
+
+        // Handle read error (NO break used)
+        if (statusA != 1 || statusB != 1) begin
+            $display("ERROR: File reading failed!");
+            $fclose(fileA);
+            $fclose(fileB);
+            $fclose(fileOut);
+            $finish;
+        end
+
+        #10; // allow time for computation
+
+        // Write output
+        $fwrite(fileOut, "%d\n", P);
+
+        // Display in console
+        $display("Time=%0t | A=%d B=%d -> P=%d", $time, A, B, P);
+    end
+
+    // Close files after completion
+    $fclose(fileA);
+    $fclose(fileB);
+    $fclose(fileOut);
+
+    $display("Simulation completed successfully.");
+    $finish;
+end
+
+endmodule
