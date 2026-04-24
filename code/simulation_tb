@@ -1,0 +1,28 @@
+`timescale 1ns / 1ps
+module tb_wallace;
+    // Inputs
+    reg [7:0] A;
+    reg [7:0] B;
+    // Output
+    wire [15:0] P;
+    // Instantiate your module
+    wallace_8x8 uut (
+        .A(A), 
+        .B(B), 
+        .P(P) );
+    initial begin
+        // Case 1: 3 * 5 = 15
+        A = 8'd3; B = 8'd5;
+        #10;
+        $display("Test 1: A=%d, B=%d | Result P=%d (Expected 15)", A, B, P);
+        // Case 2: 10 * 10 = 100
+        A = 8'd10; B = 8'd10;
+        #10;
+        $display("Test 2: A=%d, B=%d | Result P=%d (Expected 100)", A, B, P);
+        // Case 3: 255 * 255 = 65025
+        A = 8'd255; B = 8'd255;
+        #10;
+        $display("Test 3: A=%d, B=%d | Result P=%d (Expected 65025)", A, B, P);
+        $finish;
+    end
+endmodule
